@@ -2,37 +2,50 @@ package version
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
-// AppInfo ...
+// AppInfo application name and dscription
 type AppInfo struct {
+	// appl name
 	Name        string
+	// app description
 	Description string
+	// changelog for this build
+	Changelog   string
 }
 
-// GitInfo ...
+// GitInfo git details for the this build od the app
 type GitInfo struct {
+	// git commit
 	Commit string
+	// git brnach
 	Branch string
-	Repo   string
+	// git repo
+	Repo string
 }
 
-// BuildInfo ...
+// BuildInfo build timestamp and git information for the repo
 type BuildInfo struct {
 	Timestamp time.Time
 	Git       GitInfo
 }
 
-// Version ...
+// Version application version details
 type Version struct {
-	Raw    string
+	// single string message
+	Raw string
+	// version prefix
 	Prefix string
-	Major  int
-	Minor  int
-	Patch  int
+	// major version part
+	Major int
+	// minor version part
+	Minor int
+	// path version path
+	Patch int
 }
 
 var (
@@ -76,20 +89,45 @@ func (git GitInfo) String() string {
 
 // SetAppInfo ...
 func SetAppInfo(name, description string) {
-	app.Name = name
-	app.Description = description
+	if app.Name == "" {
+		app.Name = name
+		app.Description = description
+	}
 }
 
-// SetGitInfo ...
+// SetGitInfo set git details for app
 func SetGitInfo(commit, branch, repo string) {
-	build.Git.Branch = branch
-	build.Git.Commit = commit
-	build.Git.Repo = repo
+	if build.Git.Commit == "" {
+		build.Git.Branch = branch
+		build.Git.Commit = commit
+		build.Git.Repo = repo
+	}
 }
 
 // SetBuildInfo set build info
 func SetBuildInfo(timestamp string) {
-	build.Timestamp, _ = time.Parse(time.UnixDate, timestamp)
+	if build.Timestamp.IsZero() {
+		build.Timestamp, _ = time.Parse(time.UnixDate, timestamp)
+	}
+}
+
+// SetChangelog set application changelog
+func SetChangelog(changelog string) {
+	if app.Changelog == "" {
+		app.Changelog = changelog
+	}
+}
+
+// SetChangelogFromFile read changelog from a file
+func SetChangelogFromFile(path string) error {
+	if app.Changelog == "" {
+		b, err := os.ReadFile(path) // just pass the file name
+		if err != nil {
+			return err
+		}
+		app.Changelog = string(b)
+	}
+	return nil
 }
 
 // SetVersion ...
