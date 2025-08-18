@@ -133,7 +133,14 @@ func SetChangelogFromFile(path string) error {
 // SetVersion ...
 func SetVersion(ver string) {
 	version.Raw = ver
-	verparts := strings.Split(ver, ".")
+	
+	// Strip 'v' prefix if present for parsing
+	versionStr := ver
+	if strings.HasPrefix(versionStr, "v") {
+		versionStr = versionStr[1:]
+	}
+	
+	verparts := strings.Split(versionStr, ".")
 	if len(verparts) == 3 {
 		version.Major, _ = strconv.Atoi(verparts[0])
 		version.Minor, _ = strconv.Atoi(verparts[1])
