@@ -140,15 +140,22 @@ func SetVersion(ver string) {
 		versionStr = versionStr[1:]
 	}
 	
-	verparts := strings.Split(versionStr, ".")
-	if len(verparts) == 3 {
+	// Split into base version and suffix (if any)
+	// Handle formats like: 1.2.3, 1.2.3-dev, 1.2.3-dev.100
+	parts := strings.SplitN(versionStr, "-", 2)
+	baseVersion := parts[0]
+	suffix := ""
+	if len(parts) > 1 {
+		suffix = parts[1]
+	}
+	
+	// Parse the base version (X.Y.Z)
+	verparts := strings.Split(baseVersion, ".")
+	if len(verparts) >= 3 {
 		version.Major, _ = strconv.Atoi(verparts[0])
 		version.Minor, _ = strconv.Atoi(verparts[1])
-		parts := strings.Split(verparts[2], "-")
-		version.Patch, _ = strconv.Atoi(parts[0])
-		if len(parts) > 1 {
-			version.Prefix = strings.Join(parts[1:], "-")
-		}
+		version.Patch, _ = strconv.Atoi(verparts[2])
+		version.Prefix = suffix
 	}
 }
 
