@@ -1,8 +1,11 @@
 package version
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -66,9 +69,20 @@ var (
 )
 
 func init() {
+	// Priority 1: ldflags (highest priority)
 	SetBuildInfo(BuildTimestamp)
 	SetGitInfo(GitCommit, GitBranch, GitRepo)
 	SetVersion(VersionInfo)
+
+	// Priority 3: Version file (try if values still empty)
+	if version.Raw == "" || build.Git.Commit == "" {
+		loadFromDefaultLocations()
+	}
+
+	// Priority 4: Git auto-detection (try if still empty)
+	if version.Raw == "" || build.Git.Commit == "" {
+		_ = LoadFromGit()
+	}
 }
 
 func (ver Version) String() string {
@@ -184,4 +198,118 @@ func Print() {
 	fmt.Println("Running:", App())
 	fmt.Println("Version:", Get())
 	fmt.Println("Build:", Build())
+}
+
+// LoadFromFile loads version information from a key=value file.
+// Keys: VERSION, GIT_COMMIT, GIT_BRANCH, GIT_REPO, BUILD_TIMESTAMP
+func LoadFromFile(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+
+		switch key {
+		case "VERSION":
+			if version.Raw == "" {
+				SetVersion(value)
+			}
+		case "GIT_COMMIT":
+			if build.Git.Commit == "" {
+				build.Git.Commit = value
+			}
+		case "GIT_BRANCH":
+			if build.Git.Branch == "" {
+				build.Git.Branch = value
+			}
+		case "GIT_REPO":
+			if build.Git.Repo == "" {
+				build.Git.Repo = value
+			}
+		case "BUILD_TIMESTAMP":
+			if build.Timestamp.IsZero() {
+				build.Timestamp, _ = time.Parse(time.UnixDate, value)
+			}
+		}
+	}
+	return scanner.Err()
+}
+
+// loadFromDefaultLocations tries to load version info from standard locations.
+// Search order: ./.version, <exe_dir>/.version, ~/.config/<app>/.version, /etc/<app>/.version
+func loadFromDefaultLocations() {
+	locations := []string{".version"}
+
+	// Add executable directory
+	if exePath, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exePath)
+		locations = append(locations, filepath.Join(exeDir, ".version"))
+	}
+
+	// Add user config directory (requires app name)
+	if app.Name != "" {
+		if homeDir, err := os.UserHomeDir(); err == nil {
+			locations = append(locations, filepath.Join(homeDir, ".config", app.Name, ".version"))
+		}
+		// Add system config directory
+		locations = append(locations, filepath.Join("/etc", app.Name, ".version"))
+	}
+
+	for _, loc := range locations {
+		if err := LoadFromFile(loc); err == nil {
+			return
+		}
+	}
+}
+
+// LoadFromGit reads version information directly from git commands.
+// This is useful during development with 'go run'.
+func LoadFromGit() error {
+	// Check if we're in a git repository
+	if err := exec.Command("git", "rev-parse", "--git-dir").Run(); err != nil {
+		return err
+	}
+
+	// Get commit hash
+	if build.Git.Commit == "" {
+		if out, err := exec.Command("git", "rev-parse", "HEAD").Output(); err == nil {
+			build.Git.Commit = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Get branch name
+	if build.Git.Branch == "" {
+		if out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").Output(); err == nil {
+			build.Git.Branch = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Get remote URL
+	if build.Git.Repo == "" {
+		if out, err := exec.Command("git", "remote", "get-url", "origin").Output(); err == nil {
+			build.Git.Repo = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Get version from git describe (tags)
+	if version.Raw == "" {
+		if out, err := exec.Command("git", "describe", "--tags", "--always").Output(); err == nil {
+			SetVersion(strings.TrimSpace(string(out)))
+		}
+	}
+
+	return nil
 }
