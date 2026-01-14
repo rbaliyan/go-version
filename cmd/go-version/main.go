@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"os"
@@ -51,15 +50,14 @@ Usage:
   go-version ldflags [options]
 
 Options:
-  -p, -package    Package path (default: auto-detected from go.mod)
+  -p, -package    Package path (default: github.com/rbaliyan/go-version)
   -v, -version    Version string (default: from git describe)
   -shell          Output shell command with $() substitutions (default)
   -static         Output static values instead of shell substitutions
 
 Examples:
-  go build -ldflags="$(go-version ldflags)"        # Use in build command
-  go build -ldflags="$(go-version ldflags -static)" # Static values for CI
-  go-version ldflags -p myapp/internal/version     # Custom package path
+  go build -ldflags="$(go-version ldflags)" ./cmd/myapp        # Use in build command
+  go build -ldflags="$(go-version ldflags -static)" ./cmd/myapp # Static values for CI
 `
 
 func main() {
@@ -171,24 +169,6 @@ func valueOrNA(s string) string {
 	return s
 }
 
-// getModulePath reads the module path from go.mod in current directory
-func getModulePath() string {
-	file, err := os.Open("go.mod")
-	if err != nil {
-		return ""
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if strings.HasPrefix(line, "module ") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "module"))
-		}
-	}
-	return ""
-}
-
 func cmdLdflags(args []string) {
 	fs := flag.NewFlagSet("ldflags", flag.ExitOnError)
 	fs.Usage = func() { fmt.Print(ldflagsUsage) }
@@ -203,14 +183,9 @@ func cmdLdflags(args []string) {
 
 	fs.Parse(args)
 
-	// Auto-detect package from go.mod if not specified
+	// Use go-version package path by default
 	if pkg == "" {
-		pkg = getModulePath()
-		if pkg == "" {
-			fmt.Fprintln(os.Stderr, "Error: could not detect module path from go.mod")
-			fmt.Fprintln(os.Stderr, "Use -p to specify package path manually")
-			os.Exit(1)
-		}
+		pkg = "github.com/rbaliyan/go-version"
 	}
 
 	var flags []string

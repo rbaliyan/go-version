@@ -115,22 +115,17 @@ go-version file -v 1.2.3
 ### Generate ldflags for go build
 
 ```bash
-# Use in build command (auto-detects package from go.mod)
+# Use in build command
 go build -ldflags="$(go-version ldflags)" ./cmd/myapp
 
 # Static values for CI pipelines
 go build -ldflags="$(go-version ldflags -static)" ./cmd/myapp
-
-# Custom package path (overrides auto-detection)
-go-version ldflags -p myapp/internal/version
 ```
 
 Example output of `go-version ldflags -static`:
 ```
--X 'github.com/user/myapp.VersionInfo=v1.0.0' -X 'github.com/user/myapp.GitCommit=abc123...' ...
+-X 'github.com/rbaliyan/go-version.VersionInfo=v1.0.0' -X 'github.com/rbaliyan/go-version.GitCommit=abc123...' ...
 ```
-
-The package path is auto-detected from `go.mod`, so it works automatically with v2+ modules.
 
 ### Show current git info
 
