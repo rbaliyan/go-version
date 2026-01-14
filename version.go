@@ -1,3 +1,30 @@
+// Package version provides version, build, and git metadata for Go applications.
+//
+// Version info can be loaded from:
+//   - ldflags: Build-time injection via -X flags (loaded automatically in init)
+//   - Version file: Call LoadFromFile() to load from a .version file
+//   - Git: Call LoadFromGit() to detect from git repository
+//
+// # Build with ldflags
+//
+// Use the go-version CLI tool to generate ldflags:
+//
+//	go build -ldflags="$(go-version ldflags)" ./cmd/myapp
+//	go build -ldflags="$(go-version ldflags -static)" ./cmd/myapp  # for CI
+//
+// # Load from file or git
+//
+//	version.LoadFromFile(".version")  // load from specific file
+//	version.LoadFromGit()             // detect from git repo
+//
+// # Basic usage
+//
+//	import version "github.com/rbaliyan/go-version"
+//
+//	func main() {
+//	    version.SetAppInfo("myapp", "My application")
+//	    version.Print()
+//	}
 package version
 
 import (
@@ -69,20 +96,10 @@ var (
 )
 
 func init() {
-	// Priority 1: ldflags (highest priority)
+	// Load from ldflags if provided at build time
 	SetBuildInfo(BuildTimestamp)
 	SetGitInfo(GitCommit, GitBranch, GitRepo)
 	SetVersion(VersionInfo)
-
-	// Priority 3: Version file (try if values still empty)
-	if version.Raw == "" || build.Git.Commit == "" {
-		loadFromDefaultLocations()
-	}
-
-	// Priority 4: Git auto-detection (try if still empty)
-	if version.Raw == "" || build.Git.Commit == "" {
-		_ = LoadFromGit()
-	}
 }
 
 func (ver Version) String() string {

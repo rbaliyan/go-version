@@ -16,14 +16,14 @@ go get github.com/rbaliyan/go-version
 go install github.com/rbaliyan/go-version/cmd/go-version@latest
 ```
 
-## Version Source Priority
+## Version Sources
 
-The package automatically loads version info from multiple sources (highest priority first):
+Version info can be loaded from:
 
-1. **ldflags** - Build-time injection via `-X` flags
+1. **ldflags** - Build-time injection via `-X` flags (loaded automatically)
 2. **Setters** - Runtime calls to `SetVersion()`, `SetGitInfo()`, etc.
-3. **Version file** - `.version` file in predefined locations
-4. **Git** - Auto-detected from git repository (useful for `go run`)
+3. **Version file** - Call `LoadFromFile()` to load from a `.version` file
+4. **Git** - Call `LoadFromGit()` to detect from git repository
 
 ## Usage
 
@@ -81,19 +81,23 @@ The package searches for `.version` in these locations (in order):
 3. User config (`~/.config/<appname>/.version`) - requires `SetAppInfo()` first
 4. System config (`/etc/<appname>/.version`) - requires `SetAppInfo()` first
 
-### Git Auto-Detection
+### Git Detection
 
-During development with `go run`, version info is automatically read from git:
+Call `LoadFromGit()` to read version info from git commands:
+
+```go
+version.LoadFromGit()
+```
+
+This reads:
 - Commit hash from `git rev-parse HEAD`
 - Branch from `git rev-parse --abbrev-ref HEAD`
 - Version from `git describe --tags --always`
 - Remote URL from `git remote get-url origin`
 
-This happens automatically if ldflags and version file don't provide values.
-
 ## CLI Tool
 
-The `go-version` CLI can generate `.version` files and `go build` commands for your CI pipeline.
+The `go-version` CLI can generate `.version` files and ldflags for your CI pipeline.
 
 ### Generate a version file
 
@@ -108,22 +112,22 @@ go-version file -o build/.version
 go-version file -v 1.2.3
 ```
 
-### Generate go build command with ldflags
+### Generate ldflags for go build
 
 ```bash
-# Auto-detects package from go.mod
-go-version ldflags
+# Use in build command (auto-detects package from go.mod)
+go build -ldflags="$(go-version ldflags)" ./cmd/myapp
 
-# Static values (for CI pipelines)
-go-version ldflags -static
+# Static values for CI pipelines
+go build -ldflags="$(go-version ldflags -static)" ./cmd/myapp
 
 # Custom package path (overrides auto-detection)
 go-version ldflags -p myapp/internal/version
 ```
 
-Example output:
-```bash
-go build -ldflags="-X 'github.com/user/myapp.VersionInfo=$(git describe --tags --always)' ..."
+Example output of `go-version ldflags -static`:
+```
+-X 'github.com/user/myapp.VersionInfo=v1.0.0' -X 'github.com/user/myapp.GitCommit=abc123...' ...
 ```
 
 The package path is auto-detected from `go.mod`, so it works automatically with v2+ modules.

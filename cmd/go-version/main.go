@@ -45,7 +45,7 @@ Usage:
   go-version show
 `
 
-const ldflagsUsage = `Generate go build command with -ldflags for version injection
+const ldflagsUsage = `Generate -ldflags value for version injection
 
 Usage:
   go-version ldflags [options]
@@ -57,9 +57,9 @@ Options:
   -static         Output static values instead of shell substitutions
 
 Examples:
-  go-version ldflags                           # Auto-detect package from go.mod
-  go-version ldflags -static                   # Static values for CI
-  go-version ldflags -p myapp/internal/version # Custom package path
+  go build -ldflags="$(go-version ldflags)"        # Use in build command
+  go build -ldflags="$(go-version ldflags -static)" # Static values for CI
+  go-version ldflags -p myapp/internal/version     # Custom package path
 `
 
 func main() {
@@ -252,5 +252,5 @@ func cmdLdflags(args []string) {
 		flags = append(flags, fmt.Sprintf("-X '%s.BuildTimestamp=$(date -u \"+%%a %%b %%d %%H:%%M:%%S %%Z %%Y\")'", pkg))
 	}
 
-	fmt.Printf("go build -ldflags=\"%s\"\n", strings.Join(flags, " "))
+	fmt.Println(strings.Join(flags, " "))
 }
