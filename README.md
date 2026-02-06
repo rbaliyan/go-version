@@ -10,14 +10,9 @@ A lightweight Go package for embedding version, build, and git metadata into you
 
 ### CLI Tool
 
-**Homebrew (macOS/Linux):**
-```bash
-brew install rbaliyan/tap/go-version
-```
-
 **Install script:**
 ```bash
-curl -sSfL https://raw.githubusercontent.com/rbaliyan/go-version/master/install.sh | sh
+curl -sSfL https://raw.githubusercontent.com/rbaliyan/go-version/main/install.sh | sh
 ```
 
 **Go install:**

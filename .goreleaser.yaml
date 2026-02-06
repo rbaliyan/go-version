@@ -58,24 +58,6 @@ changelog:
       - Merge pull request
       - Merge branch
 
-brews:
-  - name: go-version
-    repository:
-      owner: rbaliyan
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
-    homepage: "https://github.com/rbaliyan/go-version"
-    description: "Embed version, build, and git metadata into Go binaries"
-    license: "MIT"
-    install: |
-      bin.install "go-version"
-      bash_completion.install "completions/go-version.bash" => "go-version"
-      zsh_completion.install "completions/go-version.zsh" => "_go-version"
-      fish_completion.install "completions/go-version.fish"
-    test: |
-      system "#{bin}/go-version", "show"
-
 nfpms:
   - id: packages
     package_name: go-version
