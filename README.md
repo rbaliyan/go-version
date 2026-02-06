@@ -1,5 +1,9 @@
 # go-version
 
+[![CI](https://github.com/rbaliyan/go-version/actions/workflows/ci.yml/badge.svg)](https://github.com/rbaliyan/go-version/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/rbaliyan/go-version.svg)](https://pkg.go.dev/github.com/rbaliyan/go-version)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rbaliyan/go-version)](https://goreportcard.com/report/github.com/rbaliyan/go-version)
+
 A lightweight Go package for embedding version, build, and git metadata into your application binaries. Supports multiple injection methods with automatic fallback.
 
 ## Installation
