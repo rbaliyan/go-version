@@ -1,4 +1,5 @@
 [tools]
 go = "1.24"
 just = "latest"
+goreleaser = "latest"
 "go:golang.org/x/vuln/cmd/govulncheck" = "latest"

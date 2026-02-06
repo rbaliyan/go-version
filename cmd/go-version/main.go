@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	version "github.com/rbaliyan/go-version"
 )
 
 const usage = `go-version - Generate and manage version files
@@ -18,6 +20,7 @@ Commands:
   file        Generate a .version file from git or manual input
   ldflags     Generate go build command with -ldflags for version injection
   show        Show version information from git
+  version     Show go-version CLI version
 
 Run 'go-version <command> -h' for more information on a command.
 `
@@ -73,6 +76,8 @@ func main() {
 		cmdLdflags(os.Args[2:])
 	case "show":
 		cmdShow(os.Args[2:])
+	case "version", "-v", "--version":
+		cmdVersion()
 	case "-h", "--help", "help":
 		fmt.Print(usage)
 	default:
@@ -167,6 +172,24 @@ func valueOrNA(s string) string {
 		return "N/A"
 	}
 	return s
+}
+
+func cmdVersion() {
+	version.SetAppInfo("go-version", "Generate and manage version files for Go projects")
+	v := version.Get()
+	g := version.Git()
+	b := version.Build()
+
+	fmt.Printf("go-version %s\n", v.Raw)
+	if g.Commit != "" {
+		fmt.Printf("  commit:  %s\n", g.Commit)
+	}
+	if g.Branch != "" {
+		fmt.Printf("  branch:  %s\n", g.Branch)
+	}
+	if !b.Timestamp.IsZero() {
+		fmt.Printf("  built:   %s\n", b.Timestamp.Format(time.RFC3339))
+	}
 }
 
 func cmdLdflags(args []string) {

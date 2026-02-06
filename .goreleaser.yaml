@@ -1,0 +1,105 @@
+version: 2
+
+project_name: go-version
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: go-version
+    main: ./cmd/go-version
+    binary: go-version
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/rbaliyan/go-version.VersionInfo={{.Version}}
+      - -X github.com/rbaliyan/go-version.GitCommit={{.Commit}}
+      - -X github.com/rbaliyan/go-version.GitBranch={{.Branch}}
+      - -X 'github.com/rbaliyan/go-version.BuildTimestamp={{.Date}}'
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - completions/*
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+
+brews:
+  - name: go-version
+    repository:
+      owner: rbaliyan
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/rbaliyan/go-version"
+    description: "Embed version, build, and git metadata into Go binaries"
+    license: "MIT"
+    install: |
+      bin.install "go-version"
+      bash_completion.install "completions/go-version.bash" => "go-version"
+      zsh_completion.install "completions/go-version.zsh" => "_go-version"
+      fish_completion.install "completions/go-version.fish"
+    test: |
+      system "#{bin}/go-version", "show"
+
+nfpms:
+  - id: packages
+    package_name: go-version
+    vendor: Rajeev Baliyan
+    homepage: https://github.com/rbaliyan/go-version
+    maintainer: Rajeev Baliyan
+    description: Embed version, build, and git metadata into Go binaries
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    contents:
+      - src: ./completions/go-version.bash
+        dst: /usr/share/bash-completion/completions/go-version
+      - src: ./completions/go-version.zsh
+        dst: /usr/share/zsh/vendor-completions/_go-version
+      - src: ./completions/go-version.fish
+        dst: /usr/share/fish/vendor_completions.d/go-version.fish
+
+release:
+  github:
+    owner: rbaliyan
+    name: go-version
+  draft: false
+  prerelease: auto
+  name_template: "{{.Tag}}"

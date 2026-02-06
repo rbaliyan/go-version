@@ -41,11 +41,11 @@ import (
 // AppInfo application name and dscription
 type AppInfo struct {
 	// appl name
-	Name        string
+	Name string
 	// app description
 	Description string
 	// changelog for this build
-	Changelog   string
+	Changelog string
 }
 
 // GitInfo git details for the this build od the app
@@ -164,13 +164,13 @@ func SetChangelogFromFile(path string) error {
 // SetVersion ...
 func SetVersion(ver string) {
 	version.Raw = ver
-	
+
 	// Strip 'v' prefix if present for parsing
 	versionStr := ver
 	if strings.HasPrefix(versionStr, "v") {
 		versionStr = versionStr[1:]
 	}
-	
+
 	// Split into base version and suffix (if any)
 	// Handle formats like: 1.2.3, 1.2.3-dev, 1.2.3-dev.100
 	parts := strings.SplitN(versionStr, "-", 2)
@@ -179,7 +179,7 @@ func SetVersion(ver string) {
 	if len(parts) > 1 {
 		suffix = parts[1]
 	}
-	
+
 	// Parse the base version (X.Y.Z)
 	verparts := strings.Split(baseVersion, ".")
 	if len(verparts) >= 3 {
