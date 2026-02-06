@@ -3,6 +3,9 @@
 [![CI](https://github.com/rbaliyan/go-version/actions/workflows/ci.yml/badge.svg)](https://github.com/rbaliyan/go-version/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/rbaliyan/go-version.svg)](https://pkg.go.dev/github.com/rbaliyan/go-version)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rbaliyan/go-version)](https://goreportcard.com/report/github.com/rbaliyan/go-version)
+[![Release](https://img.shields.io/github/v/release/rbaliyan/go-version)](https://github.com/rbaliyan/go-version/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rbaliyan/go-version/badge)](https://scorecard.dev/viewer/?uri=github.com/rbaliyan/go-version)
 
 A lightweight Go package for embedding version, build, and git metadata into your application binaries. Supports multiple injection methods with automatic fallback.
 
