@@ -36,7 +36,7 @@ fmt:
 
 # Lint code
 lint:
-    go vet ./...
+    golangci-lint run ./...
 
 # Tidy dependencies
 tidy:
