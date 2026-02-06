@@ -99,7 +99,10 @@ func cmdFile(args []string) {
 	fs.StringVar(&timestamp, "t", "", "Build timestamp")
 	fs.StringVar(&timestamp, "timestamp", "", "Build timestamp")
 
-	fs.Parse(args)
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
+		os.Exit(1)
+	}
 
 	// Gather git info
 	commit := gitCommand("rev-parse", "HEAD")
@@ -145,7 +148,10 @@ func cmdFile(args []string) {
 func cmdShow(args []string) {
 	fs := flag.NewFlagSet("show", flag.ExitOnError)
 	fs.Usage = func() { fmt.Print(showUsage) }
-	fs.Parse(args)
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
+		os.Exit(1)
+	}
 
 	commit := gitCommand("rev-parse", "HEAD")
 	branch := gitCommand("rev-parse", "--abbrev-ref", "HEAD")
@@ -204,7 +210,10 @@ func cmdLdflags(args []string) {
 	fs.StringVar(&version, "version", "", "Version string")
 	fs.BoolVar(&static, "static", false, "Output static values")
 
-	fs.Parse(args)
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing flags: %v\n", err)
+		os.Exit(1)
+	}
 
 	// Use go-version package path by default
 	if pkg == "" {

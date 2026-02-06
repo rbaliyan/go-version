@@ -32,7 +32,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -166,10 +165,7 @@ func SetVersion(ver string) {
 	version.Raw = ver
 
 	// Strip 'v' prefix if present for parsing
-	versionStr := ver
-	if strings.HasPrefix(versionStr, "v") {
-		versionStr = versionStr[1:]
-	}
+	versionStr := strings.TrimPrefix(ver, "v")
 
 	// Split into base version and suffix (if any)
 	// Handle formats like: 1.2.3, 1.2.3-dev, 1.2.3-dev.100
@@ -263,33 +259,6 @@ func LoadFromFile(path string) error {
 		}
 	}
 	return scanner.Err()
-}
-
-// loadFromDefaultLocations tries to load version info from standard locations.
-// Search order: ./.version, <exe_dir>/.version, ~/.config/<app>/.version, /etc/<app>/.version
-func loadFromDefaultLocations() {
-	locations := []string{".version"}
-
-	// Add executable directory
-	if exePath, err := os.Executable(); err == nil {
-		exeDir := filepath.Dir(exePath)
-		locations = append(locations, filepath.Join(exeDir, ".version"))
-	}
-
-	// Add user config directory (requires app name)
-	if app.Name != "" {
-		if homeDir, err := os.UserHomeDir(); err == nil {
-			locations = append(locations, filepath.Join(homeDir, ".config", app.Name, ".version"))
-		}
-		// Add system config directory
-		locations = append(locations, filepath.Join("/etc", app.Name, ".version"))
-	}
-
-	for _, loc := range locations {
-		if err := LoadFromFile(loc); err == nil {
-			return
-		}
-	}
 }
 
 // LoadFromGit reads version information directly from git commands.
