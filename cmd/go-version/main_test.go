@@ -220,11 +220,11 @@ func TestCmdFile_AutoTimestamp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Extract the timestamp line
+	// Extract the timestamp line (default format is RFC 3339: %Y-%m-%dT%H:%M:%SZ)
 	for _, line := range strings.Split(string(data), "\n") {
 		if strings.HasPrefix(line, "BUILD_TIMESTAMP=") {
 			tsStr := strings.TrimPrefix(line, "BUILD_TIMESTAMP=")
-			ts, err := time.Parse(time.UnixDate, tsStr)
+			ts, err := time.Parse("2006-01-02T15:04:05Z", tsStr)
 			if err != nil {
 				t.Fatalf("failed to parse auto timestamp %q: %v", tsStr, err)
 			}
@@ -294,8 +294,22 @@ func TestCmdLdflags_ShellMode(t *testing.T) {
 	if !strings.Contains(output, fmt.Sprintf("-X '%s.GitRepo=", pkg)) {
 		t.Errorf("should contain GitRepo flag, got:\n%s", output)
 	}
-	if !strings.Contains(output, fmt.Sprintf("-X '%s.BuildTimestamp=", pkg)) {
-		t.Errorf("should contain BuildTimestamp flag, got:\n%s", output)
+	// Timestamp should NOT be included by default
+	if strings.Contains(output, "BuildTimestamp") {
+		t.Errorf("should not contain BuildTimestamp without -t flag, got:\n%s", output)
+	}
+}
+
+func TestCmdLdflags_ShellModeWithTimestamp(t *testing.T) {
+	requireGit(t)
+
+	output := captureStdout(t, func() {
+		cmdLdflags([]string{"-t"})
+	})
+
+	pkg := "github.com/rbaliyan/go-version"
+	if !strings.Contains(output, fmt.Sprintf("-X '%s.BuildTimestamp=$(date -u", pkg)) {
+		t.Errorf("should contain BuildTimestamp with date command, got:\n%s", output)
 	}
 }
 

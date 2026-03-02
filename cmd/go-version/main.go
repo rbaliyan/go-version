@@ -98,7 +98,7 @@ func main() {
 
 func cmdFile(args []string) {
 	fs := flag.NewFlagSet("file", flag.ExitOnError)
-	fs.Usage = func() { os.Stdout.WriteString(fileUsage) }
+	fs.Usage = func() { _, _ = os.Stdout.WriteString(fileUsage) }
 
 	var output, ver, timestamp, timeformat string
 	fs.StringVar(&output, "o", ".version", "Output file path")
@@ -218,7 +218,7 @@ func cmdVersion() {
 
 func cmdLdflags(args []string) {
 	fs := flag.NewFlagSet("ldflags", flag.ExitOnError)
-	fs.Usage = func() { os.Stdout.WriteString(ldflagsUsage) }
+	fs.Usage = func() { _, _ = os.Stdout.WriteString(ldflagsUsage) }
 
 	var pkg, ver, timeformat string
 	var static, timestamp bool
