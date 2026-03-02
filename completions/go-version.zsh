@@ -22,17 +22,20 @@ _go-version() {
             case $words[2] in
                 file)
                     _arguments \
-                        '(-o -output)'{-o,-output}'[Output file path]:file:_files' \
-                        '(-v -version)'{-v,-version}'[Version string]:version:' \
-                        '(-t -timestamp)'{-t,-timestamp}'[Build timestamp]:timestamp:' \
+                        '(-o --output)'{-o,--output}'[Output file path]:file:_files' \
+                        '(-v --version)'{-v,--version}'[Version string]:version:' \
+                        '(-t --timestamp)'{-t,--timestamp}'[Build timestamp]:timestamp:' \
+                        '--timeformat[Timestamp format for date command]:format:' \
                         '-h[Show help]'
                     ;;
                 ldflags)
                     _arguments \
-                        '(-p -package)'{-p,-package}'[Package path]:package:' \
-                        '(-v -version)'{-v,-version}'[Version string]:version:' \
-                        '-static[Output static values]' \
-                        '-shell[Output shell substitutions]' \
+                        '(-p --package)'{-p,--package}'[Package path]:package:' \
+                        '(-v --version)'{-v,--version}'[Version string]:version:' \
+                        '(-t --timestamp)'{-t,--timestamp}'[Include build timestamp]' \
+                        '--timeformat[Timestamp format for date command]:format:' \
+                        '--static[Output static values]' \
+                        '--shell[Output shell substitutions]' \
                         '-h[Show help]'
                     ;;
                 show|version|help)

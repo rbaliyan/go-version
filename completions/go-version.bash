@@ -15,14 +15,14 @@ _go_version() {
             return 0
             ;;
         file)
-            COMPREPLY=( $(compgen -W "-o -output -v -version -t -timestamp -h" -- "${cur}") )
+            COMPREPLY=( $(compgen -W "-o --output -v --version -t --timestamp --timeformat -h" -- "${cur}") )
             return 0
             ;;
         ldflags)
-            COMPREPLY=( $(compgen -W "-p -package -v -version -static -shell -h" -- "${cur}") )
+            COMPREPLY=( $(compgen -W "-p --package -v --version -t --timestamp --timeformat --static --shell -h" -- "${cur}") )
             return 0
             ;;
-        -o|-output)
+        -o|--output)
             COMPREPLY=( $(compgen -f -- "${cur}") )
             return 0
             ;;

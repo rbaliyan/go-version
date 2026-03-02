@@ -8,11 +8,11 @@ build:
 
 # Build the CLI binary with version info
 build-cli:
-    go build -ldflags="$(go run ./cmd/go-version ldflags -static)" -o bin/go-version ./cmd/go-version
+    go build -ldflags="$(go run ./cmd/go-version ldflags -static -t)" -o bin/go-version ./cmd/go-version
 
 # Install the CLI locally
 install:
-    go install -ldflags="$(go run ./cmd/go-version ldflags -static)" ./cmd/go-version
+    go install -ldflags="$(go run ./cmd/go-version ldflags -static -t)" ./cmd/go-version
 
 # Run tests
 test:
