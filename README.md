@@ -57,16 +57,25 @@ go-version file -o build/.version
 
 # Manual version override
 go-version file -v 1.2.3
+
+# Custom timestamp format (uses date command format strings)
+go-version file --timeformat "%Y-%m-%d"
 ```
 
 ### Generate ldflags for go build
 
 ```bash
-# Use in build command (shell substitutions)
+# Use in build command (shell substitutions, no timestamp by default)
 go build -ldflags="$(go-version ldflags)" ./cmd/myapp
 
+# Include build timestamp (RFC 3339 by default)
+go build -ldflags="$(go-version ldflags -t)" ./cmd/myapp
+
+# Custom timestamp format
+go build -ldflags="$(go-version ldflags -t --timeformat '%Y-%m-%d')" ./cmd/myapp
+
 # Static values for CI pipelines
-go build -ldflags="$(go-version ldflags -static)" ./cmd/myapp
+go build -ldflags="$(go-version ldflags --static -t)" ./cmd/myapp
 
 # Custom package path
 go build -ldflags="$(go-version ldflags -p mycompany/myapp)" ./cmd/myapp
@@ -186,7 +195,7 @@ This reads:
 |----------|-------------|
 | `SetAppInfo(name, description)` | Set application name and description |
 | `SetVersion(ver)` | Parse and set semantic version (supports `v` prefix and suffixes like `1.2.3-dev`) |
-| `SetBuildInfo(timestamp)` | Set build timestamp (format: `time.UnixDate`) |
+| `SetBuildInfo(timestamp)` | Set build timestamp (accepts multiple formats: RFC 3339, UnixDate, RFC 1123, etc.) |
 | `SetGitInfo(commit, branch, repo)` | Set git metadata |
 | `SetChangelog(changelog)` | Set changelog text |
 | `SetChangelogFromFile(path)` | Load changelog from file |
@@ -213,7 +222,7 @@ These package-level variables can be set via `-ldflags -X`:
 - `GitCommit` - Git commit hash
 - `GitBranch` - Git branch name
 - `GitRepo` - Git repository URL
-- `BuildTimestamp` - Build time in `time.UnixDate` format
+- `BuildTimestamp` - Build time (supports multiple formats: RFC 3339, UnixDate, RFC 1123, etc.)
 
 ## License
 

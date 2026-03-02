@@ -134,10 +134,28 @@ func SetGitInfo(commit, branch, repo string) {
 	}
 }
 
+// supportedFormats lists time formats that SetBuildInfo will try when parsing timestamps.
+var supportedFormats = []string{
+	time.UnixDate,
+	time.RFC3339,
+	time.RFC1123,
+	time.RFC1123Z,
+	time.RFC822,
+	time.RFC850,
+	"2006-01-02T15:04:05",
+	"2006-01-02 15:04:05",
+	"2006-01-02",
+}
+
 // SetBuildInfo set build info
 func SetBuildInfo(timestamp string) {
 	if build.Timestamp.IsZero() {
-		build.Timestamp, _ = time.Parse(time.UnixDate, timestamp)
+		for _, format := range supportedFormats {
+			if t, err := time.Parse(format, timestamp); err == nil {
+				build.Timestamp = t
+				return
+			}
+		}
 	}
 }
 
@@ -254,7 +272,7 @@ func LoadFromFile(path string) error {
 			}
 		case "BUILD_TIMESTAMP":
 			if build.Timestamp.IsZero() {
-				build.Timestamp, _ = time.Parse(time.UnixDate, value)
+				SetBuildInfo(value)
 			}
 		}
 	}

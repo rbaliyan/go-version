@@ -20,3 +20,4 @@ dist/
 
 # Version file (generated)
 .version
+.claude/
