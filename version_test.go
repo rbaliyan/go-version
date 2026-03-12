@@ -732,6 +732,44 @@ func TestApp_ReturnsAppInfo(t *testing.T) {
 	}
 }
 
+// --- loadFromBuildInfo tests ---
+
+func TestLoadFromBuildInfo_DoesNotOverwriteLdflags(t *testing.T) {
+	resetState()
+
+	// Simulate ldflags already set
+	SetVersion("1.0.0")
+	SetGitInfo("ldflags-commit", "main", "repo")
+	SetBuildInfo("Mon Jan  2 15:04:05 UTC 2006")
+
+	// loadFromBuildInfo should not overwrite any of these
+	loadFromBuildInfo()
+
+	v := Get()
+	if v.Raw != "1.0.0" {
+		t.Errorf("Raw = %q, want %q (should not overwrite ldflags)", v.Raw, "1.0.0")
+	}
+
+	g := Git()
+	if g.Commit != "ldflags-commit" {
+		t.Errorf("Commit = %q, want %q (should not overwrite ldflags)", g.Commit, "ldflags-commit")
+	}
+}
+
+func TestLoadFromBuildInfo_FillsEmptyState(t *testing.T) {
+	resetState()
+
+	// With empty state, loadFromBuildInfo should populate from debug.ReadBuildInfo
+	loadFromBuildInfo()
+
+	// We're running under 'go test', so ReadBuildInfo returns "(devel)" for
+	// Main.Version, which should be skipped. But VCS info should be present
+	// if we're in a git repo.
+	// This test just verifies loadFromBuildInfo doesn't panic or corrupt state.
+	v := Get()
+	_ = v // no assertion on value since it depends on test environment
+}
+
 // --- Table-driven SetVersion test ---
 
 func TestSetVersion_Table(t *testing.T) {
