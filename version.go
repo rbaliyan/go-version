@@ -1,7 +1,8 @@
 // Package version provides version, build, and git metadata for Go applications.
 //
-// Version info can be loaded from:
+// Version info is resolved in priority order:
 //   - ldflags: Build-time injection via -X flags (loaded automatically in init)
+//   - debug.ReadBuildInfo: Module version and VCS info from go install builds
 //   - Version file: Call LoadFromFile() to load from a .version file
 //   - Git: Call LoadFromGit() to detect from git repository
 //
@@ -32,6 +33,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -99,6 +101,41 @@ func init() {
 	SetBuildInfo(BuildTimestamp)
 	SetGitInfo(GitCommit, GitBranch, GitRepo)
 	SetVersion(VersionInfo)
+
+	// Fallback: use module version and VCS info from go install builds
+	loadFromBuildInfo()
+}
+
+// loadFromBuildInfo extracts version and VCS metadata from runtime/debug.ReadBuildInfo.
+// This provides correct version info for binaries built with go install.
+func loadFromBuildInfo() {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+
+	// Use module version if ldflags didn't set one
+	if version.Raw == "" && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		SetVersion(info.Main.Version)
+	}
+
+	// Extract VCS settings (available in Go 1.18+)
+	var revision, vcsTime string
+	for _, s := range info.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			revision = s.Value
+		case "vcs.time":
+			vcsTime = s.Value
+		}
+	}
+
+	if build.Git.Commit == "" && revision != "" {
+		build.Git.Commit = revision
+	}
+	if build.Timestamp.IsZero() && vcsTime != "" {
+		SetBuildInfo(vcsTime)
+	}
 }
 
 func (ver Version) String() string {
