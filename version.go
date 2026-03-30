@@ -206,7 +206,7 @@ func SetChangelog(changelog string) {
 // SetChangelogFromFile read changelog from a file
 func SetChangelogFromFile(path string) error {
 	if app.Changelog == "" {
-		b, err := os.ReadFile(path) // just pass the file name
+		b, err := os.ReadFile(path) // #nosec G304 -- reading user-specified version file
 		if err != nil {
 			return err
 		}
@@ -271,7 +271,7 @@ func Print() {
 // LoadFromFile loads version information from a key=value file.
 // Keys: VERSION, GIT_COMMIT, GIT_BRANCH, GIT_REPO, BUILD_TIMESTAMP
 func LoadFromFile(path string) error {
-	file, err := os.Open(path)
+	file, err := os.Open(path) // #nosec G304 -- reading user-specified version file
 	if err != nil {
 		return err
 	}
