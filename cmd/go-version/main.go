@@ -175,7 +175,7 @@ func cmdShow(args []string) {
 }
 
 func gitCommand(args ...string) string {
-	cmd := exec.Command("git", args...)
+	cmd := exec.Command("git", args...) // #nosec G204 -- all callers pass hardcoded git subcommands
 	out, err := cmd.Output()
 	if err != nil {
 		return ""
