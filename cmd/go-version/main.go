@@ -147,7 +147,7 @@ func cmdFile(args []string) {
 	sb.WriteString(fmt.Sprintf("BUILD_TIMESTAMP=%s\n", timestamp))
 
 	// Write to file
-	if err := os.WriteFile(output, []byte(sb.String()), 0644); err != nil {
+	if err := os.WriteFile(output, []byte(sb.String()), 0600); err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing file: %v\n", err)
 		os.Exit(1)
 	}
@@ -175,7 +175,7 @@ func cmdShow(args []string) {
 }
 
 func gitCommand(args ...string) string {
-	cmd := exec.Command("git", args...)
+	cmd := exec.Command("git", args...) // #nosec G204 -- all callers pass hardcoded git subcommands
 	out, err := cmd.Output()
 	if err != nil {
 		return ""
@@ -184,7 +184,7 @@ func gitCommand(args ...string) string {
 }
 
 func dateCommand(format string) string {
-	out, err := exec.Command("date", "-u", "+"+format).Output()
+	out, err := exec.Command("date", "-u", "+"+format).Output() // #nosec G204 -- user-provided build command is intentional
 	if err != nil {
 		return ""
 	}
